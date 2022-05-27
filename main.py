@@ -1,4 +1,8 @@
 import discord
+import datetime
+import requests
+
+date = datetime.datetime.now()
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -8,4 +12,19 @@ class MyClient(discord.Client):
         print('Message from {0.author}: {0.content}'.format(message))
 
 client = MyClient()
-client.run('my token goes here')
+
+# Read Token
+f = open("secrets.txt")
+token = f.readline().rstrip()
+f.close
+
+today = f"{date.month}/{date.day}/{date.year}"
+print("today is: " + today)
+
+reponse = requests.get(f"https://www.checkiday.com/api/3/?d={today}")
+
+print(reponse.content)
+
+
+#client.run(token)
+
