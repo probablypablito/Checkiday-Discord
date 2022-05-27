@@ -1,6 +1,7 @@
 import discord
 import datetime
 import requests
+import json
 
 date = datetime.datetime.now()
 
@@ -21,10 +22,13 @@ f.close
 today = f"{date.month}/{date.day}/{date.year}"
 print("today is: " + today)
 
-reponse = requests.get(f"https://www.checkiday.com/api/3/?d={today}")
-
-print(reponse.content)
+response = requests.get(f"https://www.checkiday.com/api/3/?d={today}")
 
 
+holidays_list = json.loads(response.content)["holidays"]
+
+
+for i in range(len(holidays_list)):
+    holiday = holidays_list[i]
+    print(holiday["name"])
 #client.run(token)
-
