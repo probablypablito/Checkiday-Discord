@@ -1,63 +1,81 @@
+import datetime, requests
+import json, random
 import discord
-import asyncio
-import datetime
-import requests
-import json
-from discord.ext import commands, tasks
+from discord.ext import tasks
+
+
+def today(type):
+    date = datetime.datetime.now()
+    if (type == "date"):
+        today = f"{date.month}/{date.day}/{date.year}"   
+    elif (type == "unix"):
+        today = date.timestamp()
+        today = round(today)
+    return today
+
 
 
 # Get today's Holidays
-def get_holidays():
-      # Get the list of holidays
+def get_holidays(type="none"):
+    # Get the list of holidays
     holidays = []
-    date = datetime.datetime.now()
-    today = f"{date.month}/{date.day}/{date.year}"
-
-    response = requests.get(f"https://www.checkiday.com/api/3/?d={today}")
+    
+    todays_date = today("date")
+    response = requests.get(f"https://www.checkiday.com/api/3/?d={todays_date}")
     holidays_list = json.loads(response.content)["holidays"]
     
     for i in range(len(holidays_list)):
         holiday = holidays_list[i]
         holidays.append(holiday["name"])
-
+    if (type == "list"): 
+        return holidays
     holidays = "\n".join(holidays)
     return holidays
 
-# Discord Bot
-bot = commands.Bot(command_prefix="!checkiday ")
-channel_list = {}
+# Get random Holiday for Status
+def rand_holiday():
+    todays_holidays = get_holidays("list")
+    rand_number = random.randint(0,len(todays_holidays)-1)
+    rand_holiday = todays_holidays[rand_number]
+    return rand_holiday
 
-# Sets value in json to guild id upon the bot joining the guild
+# Setup the
+random_holiday = rand_holiday()
+bot = discord.Bot(activity=discord.Game(name=random_holiday))
+
 @bot.event
-async def on_guild_join(guild):
-    #loads json file to dictionary
+async def on_ready():
+    print(f"We have logged in as {bot.user}")
+
+@bot.slash_command()
+async def setchannel(ctx):
     with open("db.json", "r") as f:
         guildInfo = json.load(f)
-
-    guildInfo[guild.id] = guild.text_channels[0] #sets key to guilds id and value to top textchannel
-    
-    #writes dictionary to json file
+        guildInfo[ctx.guild.id] = ctx.channel.id
     with open("db.json", "w") as f:
         json.dump(guildInfo, f)
+    await ctx.respond(f"Set channel to <#{ctx.channel.id}>")
 
-
-# Commands
-
-@bot.command()
-async def channelid(ctx, arg):
-    with open("db.json", "r") as f:
-        guildInfo = json.load(f)
-    guildInfo[ctx.message.guild.id] = arg
-    with open("db.json", "w") as f:
-        json.dump(guildInfo, f)
+@bot.slash_command()
+async def holidays(ctx):
+    holidays = get_holidays()
+    todays_date = today("unix")
+    await ctx.respond(f"**__Holidays for <t:{todays_date}:D>__**\n\n{holidays}")
 
 
 
-@tasks.loop(seconds=30)
+
+
+
+@tasks.loop(hours=24)
 async def called_once_a_day():
+    # Change Status
+    random_holiday = rand_holiday()
+    await bot.change_presence(activity=discord.Streaming(name=random_holiday, url="https://twitch.tv/probablypablito"))
    
     holidays = get_holidays()
-    # Send the message
+
+    # Send the message with Holiday list
     with open("db.json", "r") as f:
         guildInfo = json.load(f)
 
@@ -67,9 +85,9 @@ async def called_once_a_day():
             print("------------")
             print(f"channel: {channel}")
             print(f"guildInfo[i]: {guildInfo[i]}")
-            await channel.send(f"__Today's Holidays__\n\n{holidays}")
+            todays_date = today("unix")
+            await channel.send(f"**__Holidays for <t:{todays_date}:D>__**\n\n{holidays}")
         except: print("error!")
-
 
 @called_once_a_day.before_loop
 async def before():
@@ -78,13 +96,9 @@ async def before():
 
 called_once_a_day.start()
 
-
-
-
 # Read Token
 f = open("secrets.txt")
 token = f.readline().rstrip()
 f.close
-
 
 bot.run(token)
