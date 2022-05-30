@@ -6,6 +6,7 @@
 [Invite](https://discord.com/api/oauth2/authorize?client_id=979814139469893812&permissions=2147485696&scope=bot%20applications.commands) the bot to your server.
 
 Use `/holidays` to get today's holidays
+
 Use `/setchannel` to set the daily holiday notifications to the current channel
 
 There is no permissions system on this bot, I just made this for fun.
