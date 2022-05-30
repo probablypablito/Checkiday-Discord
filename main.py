@@ -50,10 +50,10 @@ async def on_ready():
 # Commands
 @bot.slash_command()
 async def setchannel(ctx):
-    with open("db.json", "r") as f:
+    with open("db/db.json", "r") as f:
         guildInfo = json.load(f)
         guildInfo[ctx.guild.id] = ctx.channel.id
-    with open("db.json", "w") as f:
+    with open("db/db.json", "w") as f:
         json.dump(guildInfo, f)
     await ctx.respond(f"Set channel to <#{ctx.channel.id}>")
 
@@ -77,7 +77,7 @@ async def called_once_a_day():
     holidays = get_holidays()
 
     # Send the message with Holiday list
-    with open("db.json", "r") as f:
+    with open("db/db.json", "r") as f:
         guildInfo = json.load(f)
 
     for i in guildInfo:
