@@ -2,7 +2,7 @@ import datetime, requests
 import json, random
 import discord
 from discord.ext import tasks
-
+import os
 
 def today(type):
     date = datetime.datetime.now()
@@ -39,7 +39,7 @@ def rand_holiday():
     rand_holiday = todays_holidays[rand_number]
     return rand_holiday
 
-# Setup the
+# Setup the bot
 random_holiday = rand_holiday()
 bot = discord.Bot(activity=discord.Game(name=random_holiday))
 
@@ -47,6 +47,7 @@ bot = discord.Bot(activity=discord.Game(name=random_holiday))
 async def on_ready():
     print(f"We have logged in as {bot.user}")
 
+# Commands
 @bot.slash_command()
 async def setchannel(ctx):
     with open("db.json", "r") as f:
@@ -66,7 +67,7 @@ async def holidays(ctx):
 
 
 
-
+# Loop every 24h
 @tasks.loop(hours=24)
 async def called_once_a_day():
     # Change Status
@@ -96,9 +97,5 @@ async def before():
 
 called_once_a_day.start()
 
-# Read Token
-f = open("secrets.txt")
-token = f.readline().rstrip()
-f.close
-
-bot.run(token)
+# Run the bot
+bot.run(os.getenv("TOKEN"))
