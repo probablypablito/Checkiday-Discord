@@ -25,5 +25,5 @@ There is no permissions system on this bot, I just made this for fun.
 1) Clone the repo & cd into it
 2) Make a folder called `db` with 1 file in called `db.json`. Inside put `{}`
 3) Make an enviornment variable called `TOKEN` and have it be your token
-3a) Alternatively insert your token manually into `main.py` at the bottom
-4) Run `main.py`
+4) Alternatively insert your token manually into `main.py` at the bottom
+5) Run `main.py`
