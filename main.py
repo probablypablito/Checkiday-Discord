@@ -3,14 +3,15 @@ import json, random
 import discord
 from discord.ext import tasks
 import os
+from discord.utils import get
+
 
 def today(type):
     date = datetime.datetime.now()
     if (type == "date"):
         today = f"{date.month}/{date.day}/{date.year}"   
-    elif (type == "unix"):
-        today = date.timestamp()
-        today = round(today)
+    elif (type == "word"):
+        today = date.strftime("%B %m %Y")
     return today
 
 
@@ -52,7 +53,7 @@ async def on_ready():
 async def setchannel(ctx):
     with open("db/db.json", "r") as f:
         guildInfo = json.load(f)
-        guildInfo[ctx.guild.id] = ctx.channel.id
+        guildInfo[str(ctx.guild.id)] = str(ctx.channel.id)
     with open("db/db.json", "w") as f:
         json.dump(guildInfo, f)
     await ctx.respond(f"Set channel to <#{ctx.channel.id}>")
@@ -60,16 +61,18 @@ async def setchannel(ctx):
 @bot.slash_command()
 async def holidays(ctx):
     holidays = get_holidays()
-    todays_date = today("unix")
-    await ctx.respond(f"**__Holidays for <t:{todays_date}:D>__**\n\n{holidays}")
+    todays_date = today("word")
+    await ctx.respond(f"**__Holidays for {todays_date}__**\n{holidays}")
 
+@tasks.loop(hours=1)
+async def send_holidays():
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H")
+    
 
+    if(current_time != '17'):  # check if matches with the desired time
+        return
 
-
-
-# Loop every 24h
-@tasks.loop(hours=24)
-async def called_once_a_day():
     # Change Status
     random_holiday = rand_holiday()
     await bot.change_presence(activity=discord.Streaming(name=random_holiday, url="https://twitch.tv/probablypablito"))
@@ -82,20 +85,23 @@ async def called_once_a_day():
 
     for i in guildInfo:
         channel = bot.get_channel(int(guildInfo[i]))
-        try:
-            print("------------")
-            print(f"channel: {channel}")
-            print(f"guildInfo[i]: {guildInfo[i]}")
-            todays_date = today("unix")
-            await channel.send(f"**__Holidays for <t:{todays_date}:D>__**\n\n{holidays}")
-        except: print("error!")
+        guild = bot.get_guild(int(i))
 
-@called_once_a_day.before_loop
+        try:
+            todays_date = today("word")
+            role = get(guild.roles, name="Holidays")
+            if role == None:
+                role = get(guild.roles, name="holidays") # Try to check if it's all lowercase
+            await channel.send(f"**__{role.mention} for {todays_date}__**\n{holidays}")
+        except: print("error sending holiday list")
+
+
+
+@send_holidays.before_loop
 async def before():
     await bot.wait_until_ready()
     print("Finished waiting")
 
-called_once_a_day.start()
 
-# Run the bot
+send_holidays.start()
 bot.run(os.getenv("TOKEN"))
