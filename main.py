@@ -67,10 +67,10 @@ async def holidays(ctx):
 @tasks.loop(hours=1)
 async def send_holidays():
     now = datetime.datetime.now()
-    current_time = now.strftime("%H")
+    current_time = now.strftime("%H:%M")
     
 
-    if(current_time != '17'):  # check if matches with the desired time
+    if(current_time != '17:00'):  # check if matches with the desired time
         return
 
     # Change Status
