@@ -11,7 +11,7 @@ def today(type):
     if (type == "date"):
         today = f"{date.month}/{date.day}/{date.year}"   
     elif (type == "word"):
-        today = date.strftime("%B %m %Y")
+        today = date.strftime("%B %d %Y")
     return today
 
 
