@@ -64,7 +64,7 @@ async def holidays(ctx):
     todays_date = today("word")
     await ctx.respond(f"**__Holidays for {todays_date}__**\n{holidays}")
 
-@tasks.loop(hours=1)
+@tasks.loop(minutes=1)
 async def send_holidays():
     now = datetime.datetime.now()
     current_time = now.strftime("%H:%M")
