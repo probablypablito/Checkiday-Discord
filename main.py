@@ -51,6 +51,10 @@ async def on_ready():
 # Commands
 @bot.slash_command()
 async def setchannel(ctx):
+    if not os.path.exists('db/db2.json'):
+        with open("db/db.json", "a") as f:
+            f.write("{}")
+            f.close
     with open("db/db.json", "r") as f:
         guildInfo = json.load(f)
         guildInfo[str(ctx.guild.id)] = str(ctx.channel.id)
@@ -75,7 +79,7 @@ async def send_holidays():
 
     # Change Status
     random_holiday = rand_holiday()
-    await bot.change_presence(activity=discord.Streaming(name=random_holiday, url="https://twitch.tv/probablypablito"))
+    await bot.change_presence(game=discord.Game(name=random_holiday, type=1))
    
     holidays = get_holidays()
 
