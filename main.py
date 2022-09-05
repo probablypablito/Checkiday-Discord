@@ -79,7 +79,7 @@ async def send_holidays():
 
     # Change Status
     random_holiday = rand_holiday()
-    await bot.change_presence(game=discord.Game(name=random_holiday, type=1))
+    await bot.change_presence(activity=discord.Game(name=random_holiday))
    
     holidays = get_holidays()
 
