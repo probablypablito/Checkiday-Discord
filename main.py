@@ -51,7 +51,9 @@ async def on_ready():
 # Commands
 @bot.slash_command()
 async def setchannel(ctx):
-    if not os.path.exists('db/db2.json'):
+    await ctx.defer()
+    if not os.path.exists('db/db.json'):
+        os.makedirs(os.path.dirname('db/db.json'), exist_ok=True)
         with open("db/db.json", "a") as f:
             f.write("{}")
             f.close
@@ -60,13 +62,14 @@ async def setchannel(ctx):
         guildInfo[str(ctx.guild.id)] = str(ctx.channel.id)
     with open("db/db.json", "w") as f:
         json.dump(guildInfo, f)
-    await ctx.respond(f"Set channel to <#{ctx.channel.id}>")
+    await ctx.followup.send(f"Set channel to <#{ctx.channel.id}>")
 
 @bot.slash_command()
 async def holidays(ctx):
+    await ctx.defer()
     holidays = get_holidays()
     todays_date = today("word")
-    await ctx.respond(f"**__Holidays for {todays_date}__**\n{holidays}")
+    await ctx.followup.send(f"**__Holidays for {todays_date}__**\n{holidays}")
 
 @tasks.loop(minutes=1)
 async def send_holidays():
